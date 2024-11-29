@@ -24,9 +24,4 @@
       <Filter>Source Files</Filter>
     </CustomBuild>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="asmtest.asm">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
 </Project>
