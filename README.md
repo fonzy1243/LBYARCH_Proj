@@ -1,4 +1,4 @@
-# Grayscale Image to Float Converter
+# Grayscale Image Float to Integer Converter
 This is a simple benchmark of raw a AMD64 assembly function compared to its equivalent C function, and also an optimized C function that uses SIMD.
 ## Benchmarked Functions
 ### Assembly Function
