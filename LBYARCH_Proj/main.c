@@ -19,15 +19,12 @@ double get_time() {
 extern void imgCvtGrayFloatToInt(int n, float* img_f32, uint8_t* img_u8);
 
 void cImgCvtGrayFloatToInv(int n, float* img_f32, uint8_t* img_u8) {
-    // Sequential for loop version
-    /*
     for (int i = 0; i < n; i++) {
         img_u8[i] = (uint8_t) (img_f32[i] * 255);
     }
-    */
+}
 
-    // SIMD version
-
+void simdImgCvtGrayFloatToInv(int n, float* img_f32, uint8_t* img_u8) {
     int i = 0;
     __m256 scale_vec = _mm256_set1_ps(255.0f);
     
@@ -56,9 +53,9 @@ void cImgCvtGrayFloatToInv(int n, float* img_f32, uint8_t* img_u8) {
     }
 }
 
-bool is_out_equal(int n, uint8_t* img1, uint8_t* img2) {
+bool is_out_equal(int n, uint8_t* img1, uint8_t* img2, uint8_t* img3) {
     for (int i = 0; i < n; i++) {
-        if (img1[n] != img2[n]) {
+        if (img1[n] != img2[n] || img2[n] != img3[n]) {
             return false;
         }
     }
@@ -68,12 +65,13 @@ bool is_out_equal(int n, uint8_t* img1, uint8_t* img2) {
 
 int main() {
     int img_h, img_w;
-    double start_time, end_time, asm_avg, c_avg;
+    double start_time, end_time, asm_avg, c_avg, simd_avg;
     scanf_s("%d %d", &img_h, &img_w);
 
     float* img_f32 = malloc((img_h * img_w) * sizeof(float));
     uint8_t* img_u8 = malloc((img_h * img_w) * sizeof(uint8_t));
     uint8_t* c_img_u8 = malloc((img_h * img_w) * sizeof(uint8_t));
+    uint8_t* simd_img_u8 = malloc((img_h * img_w) * sizeof(uint8_t));
 
     for (int i = 0; i < img_h; i++) {
         for (int j = 0; j < img_w; j++) {
@@ -106,16 +104,30 @@ int main() {
     }
 
     c_avg = total / 30;
+    total = 0;
+
+    /* Benchmark C w/ SIMD code */
+    for (int i = 0; i < 30; i++) {
+        start_time = get_time();
+        simdImgCvtGrayFloatToInv(img_h * img_w, img_f32, c_img_u8);
+        end_time = get_time();
+
+        total += (end_time - start_time);
+    }
+
+    simd_avg = total / 30;
 
     printf("\n==================================================\n");
     printf("Average AMD64 Assembly execution time (30 runs):\n");
     printf("%.16f ms\n", asm_avg * 1e3);
     printf("\nAverage C execution time (30 runs):\n");
     printf("%.16f ms\n", c_avg * 1e3);
+    printf("\nAverage C execution time w/ SIMD (30 runs):\n");
+    printf("%.16f ms\n", simd_avg * 1e3);
     printf("==================================================\n");
 
     printf("Valid result: ");
-    if (is_out_equal(img_h * img_w, img_u8, c_img_u8)) {
+    if (is_out_equal(img_h * img_w, img_u8, c_img_u8, simd_img_u8)) {
         printf("true\n");
     }
     else {
@@ -143,6 +155,7 @@ int main() {
     free(img_f32);
     free(img_u8);
     free(c_img_u8);
+    free(simd_img_u8);
 
     return 0;
 }
