@@ -14,9 +14,17 @@ Tested on the following computer specifications:
 - RAM: Kingston FURY Beast 6000 MT/S CL36 DDR5
 - GPU: ROG Poseidon GTX 1080ti
 
+Test results are validated by checking if all the output arrays are equal. The sample 1440p test image was generated randomly.
+
 Run with Visual Studio 2022 debug mode config:
 | Function | Average time | Repetitions | Valid |
 | :-------- | :------------: | :-----------: | :-----: |
 | AMD64 Assembly | 0.7921 ms | 30 | True |
 | Simple C | 2.6968 ms | 30 | True |
 | SIMD C | 0.3907 ms | 30 | True |
+
+As seen with these results, the SIMD C function vastly outperformed the other 2 functions. The raw assembly function is not far behind, while the simple C function clearly lags behind. Surprisingly, the raw assembly function is quite fast despite its processing of each element one by one and lack of further optimization. Despite the same high-level concept for both the raw assembly and the simple C functions, the lack of compiler optimizations may be affecting the simple C function's performance. Nonetheless, the benchmark shows how being closer to the metal can have a drastic effect on performance. Additionally, the SIMD function's blazingly fast speed shows the usefulness of the new AVX extensions in applications that benefit a lot from parallelism, including computer graphics.
+
+## Results Screenshots
+![image](https://github.com/user-attachments/assets/0fe444ef-0c6a-41cb-9401-2e12221057a5)
+![image](https://github.com/user-attachments/assets/e2fdb783-3c75-4351-ae2f-415c83d63e83)
